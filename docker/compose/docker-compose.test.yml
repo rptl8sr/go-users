@@ -1,0 +1,25 @@
+services:
+  test:
+    build:
+      context: ../..
+      dockerfile: docker/build/Dockerfile-test
+    container_name: go-users-test
+    ports:
+      - "${HTTP_PORT}:8080"
+    depends_on:
+      migrations:
+        condition: service_completed_successfully
+    command: go test -v ./internal/...
+
+  app:
+    build:
+      context: ../..
+      dockerfile: docker/build/Dockerfile-app
+    container_name: go-users-app-test
+    ports:
+      - "${HTTP_PORT}:8080"
+    env_file:
+      - ../../.env.test
+    depends_on:
+      migrations:
+        condition: service_completed_successfully

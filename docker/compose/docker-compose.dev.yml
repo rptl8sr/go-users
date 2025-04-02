@@ -1,0 +1,62 @@
+services:
+  postgres:
+    container_name: go-users-postgres-dev
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: go-users-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@admin.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}      
+    ports:
+      - "${PGADMIN_LISTEN_PORT}:80"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    user: root
+    configs:
+    - source: servers.json
+      target: /pgadmin4/servers.json
+    - source: pgpass
+      target: /pgpass
+
+  app:
+    build:
+      context: ../..
+      dockerfile: docker/build/Dockerfile-app
+    container_name: go-users-app-dev
+    ports:
+      - "${HTTP_PORT}:8080"
+    env_file:
+      - ../../.env.dev
+    depends_on:
+      migrations:
+        condition: service_completed_successfully
+
+volumes:
+  postgres_data_dev:
+  pgadmin_data: 
+
+configs:
+  pgpass:
+    content: postgres:5432:${DB_NAME}:${DB_USER}:${DB_PASSWORD}
+  servers.json:
+    content: |
+      {
+        "Servers": {
+          "1": {
+            "Name": "Dev PostgreSQL",
+            "Group": "Servers",
+            "Host": "postgres",
+            "Port": 5432,
+            "MaintenanceDB": "${DB_NAME}",
+            "Username": "${DB_USER}",
+            "PassFile": "/pgpass",
+            "SSLMode": "${DB_SSL_MODE}"
+          }
+        }
+      } 
