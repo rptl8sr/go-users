@@ -1,5 +1,3 @@
-.PHONY: help generate test-local test-all dev dev-down prod prod-down
-
 help:
 	@echo "Available commands:"
 	@echo "  make generate     - generate code"
@@ -33,7 +31,7 @@ dev-down:
 	APP_MODE=dev docker-compose -f docker/compose/docker-compose.base.yml -f docker/compose/docker-compose.dev.yml --env-file .env.dev down -v
 
 prod:
-	APP_MODE=prod docker-compose -f docker/compose/docker-compose.base.yml -f docker/compose/docker-compose.prod.yml --env-file .env.prod up --build -d
+	APP_MODE=prod docker-compose -f docker/compose/docker-compose.base.yml -f docker/compose/docker-compose.prod.yml --env-file .env.prod up --build
 
 prod-down:
 	APP_MODE=prod docker-compose -f docker/compose/docker-compose.base.yml -f docker/compose/docker-compose.prod.yml --env-file .env.prod down
